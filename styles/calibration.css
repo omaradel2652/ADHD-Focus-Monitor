@@ -1,0 +1,94 @@
+/**
+ * calibration.css — Styles for WebGazer calibration and debug indicator
+ */
+
+/* ── Calibration Overlay ────────────────────── */
+#adhd-calibration-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483646;
+    background: rgba(15, 17, 23, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #f0f2ff;
+    font-family: 'Inter', sans-serif;
+}
+
+#adhd-calibration-instr {
+    margin-bottom: 40px;
+    text-align: center;
+    max-width: 400px;
+}
+
+#adhd-calibration-instr h2 {
+    font-size: 24px;
+    margin-bottom: 8px;
+    color: #7c6bff;
+}
+
+.adhd-calib-dot {
+    position: fixed;
+    width: 25px;
+    height: 25px;
+    background: #7c6bff;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 2147483647;
+    transition: transform 0.1s, background 0.2s;
+    box-shadow: 0 0 15px rgba(124, 107, 255, 0.6);
+}
+
+.adhd-calib-dot:hover {
+    transform: scale(1.2);
+}
+
+.adhd-calib-dot.clicked-1 {
+    background: #ffcc00;
+}
+
+.adhd-calib-dot.clicked-2 {
+    background: #00ffcc;
+}
+
+/* ── Debug Indicator ────────────────────────── */
+#adhd-debug-panel {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 2147483647;
+    background: rgba(15, 17, 23, 0.85);
+    border: 1px solid rgba(124, 107, 255, 0.4);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: #f0f2ff;
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 11px;
+    pointer-events: none;
+    backdrop-filter: blur(4px);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.adhd-debug-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: bold;
+}
+
+.adhd-debug-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff4d4d;
+    /* red default */
+}
+
+.adhd-debug-dot.ok {
+    background: #4dff88;
+    /* green */
+}

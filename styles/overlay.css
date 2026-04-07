@@ -1,0 +1,64 @@
+/**
+ * overlay.css — Minimal top-of-page session progress bar
+ * Injected into all pages via content_scripts in manifest.json
+ */
+
+/* ── Bar container ───────────────────────────────────────── */
+#adhd-timer-bar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 5px !important;
+    z-index: 2147483647 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: auto !important;
+    /* Expand hover hit-area downward so tooltip is reachable */
+    padding-bottom: 12px !important;
+    box-sizing: content-box !important;
+}
+
+/* ── Colored fill ────────────────────────────────────────── */
+#adhd-timer-fill {
+    height: 5px !important;
+    width: 100% !important;
+    background: #6c63ff !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    /* Smooth shrink — updated every 1s by JS */
+    transition: width 1s linear !important;
+    transform-origin: left center !important;
+}
+
+/* ── Tooltip (hidden by default, shown on hover) ─────────── */
+#adhd-tooltip {
+    position: absolute !important;
+    top: 10px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    background: rgba(15, 15, 19, 0.92) !important;
+    color: #eeeef5 !important;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+    padding: 5px 12px !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(108, 99, 255, 0.35) !important;
+    white-space: nowrap !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    transition: opacity 0.2s ease !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+}
+
+#adhd-tooltip.visible {
+    opacity: 1 !important;
+}

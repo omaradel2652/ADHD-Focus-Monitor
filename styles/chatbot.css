@@ -1,0 +1,186 @@
+/**
+ * chatbot.css — Full chatbot panel overlay (Level 5 intervention)
+ * Also used for post-session debrief panel.
+ * Applied via content_scripts in manifest.json
+ */
+
+/* ── Full Panel Container ──────────────────── */
+#adhd-chatbot-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    animation: adhdOverlayIn 0.25s ease forwards;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+@keyframes adhdOverlayIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ── Chat Window ───────────────────────────── */
+#adhd-chatbot-window {
+    width: 400px;
+    max-width: 90vw;
+    max-height: 70vh;
+    background: #0f1117;
+    border: 1px solid rgba(124, 107, 255, 0.35);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7);
+    animation: adhdWindowIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    overflow: hidden;
+}
+
+@keyframes adhdWindowIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* ── Header ────────────────────────────────── */
+#adhd-chatbot-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid #2a2f47;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex-shrink: 0;
+}
+
+#adhd-chatbot-header .adhd-chat-icon {
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, #7c6bff, #4fa3e8);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+}
+
+#adhd-chatbot-header .adhd-chat-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #f0f2ff;
+}
+
+#adhd-chatbot-header .adhd-chat-sub {
+    font-size: 11px;
+    color: #8b93b8;
+}
+
+#adhd-chatbot-close {
+    margin-left: auto;
+    background: none;
+    border: 1px solid #2a2f47;
+    color: #545c7e;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+#adhd-chatbot-close:hover {
+    border-color: #7c6bff;
+    color: #f0f2ff;
+}
+
+/* ── Message List ──────────────────────────── */
+#adhd-chatbot-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scroll-behavior: smooth;
+}
+
+#adhd-chatbot-messages::-webkit-scrollbar {
+    width: 4px;
+}
+
+#adhd-chatbot-messages::-webkit-scrollbar-thumb {
+    background: #2a2f47;
+    border-radius: 99px;
+}
+
+/* ── Input Area ────────────────────────────── */
+#adhd-chatbot-input-area {
+    padding: 10px 14px 14px;
+    border-top: 1px solid #2a2f47;
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    flex-shrink: 0;
+}
+
+#adhd-chatbot-input {
+    flex: 1;
+    background: #1e2235;
+    border: 1px solid #2a2f47;
+    border-radius: 12px;
+    padding: 9px 13px;
+    color: #f0f2ff;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    resize: none;
+    outline: none;
+    min-height: 38px;
+    max-height: 90px;
+    line-height: 1.4;
+    transition: border-color 0.2s;
+}
+
+#adhd-chatbot-input:focus {
+    border-color: #7c6bff;
+}
+
+#adhd-chatbot-input::placeholder {
+    color: #545c7e;
+}
+
+#adhd-chatbot-send {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #7c6bff, #6054e8);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.15s, box-shadow 0.15s;
+    color: #fff;
+    font-size: 16px;
+}
+
+#adhd-chatbot-send:hover {
+    transform: scale(1.06);
+    box-shadow: 0 4px 14px rgba(124, 107, 255, 0.45);
+}

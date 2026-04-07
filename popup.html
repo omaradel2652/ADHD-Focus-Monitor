@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ADHD Focus Monitor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0f0f13;
+            --card: #1a1a2e;
+            --border: #1e1e2e;
+            --border-lit: #6c63ff55;
+            --accent: #6c63ff;
+            --accent-dim: #6c63ff22;
+            --green: #22c55e;
+            --green-dim: #22c55e18;
+            --user-bubble: #6c63ff;
+            --ai-bubble: #1e1e2e;
+            --text: #eeeef5;
+            --muted: #7b7b9d;
+            --faint: #3a3a55;
+            --radius: 12px;
+        }
+
+        html,
+        body {
+            width: 380px;
+            height: 520px;
+            overflow: hidden;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 13px;
+        }
+
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 520px;
+            overflow: hidden;
+        }
+
+        /* ── HEADER ───────────────────── */
+        .hdr {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 13px 16px 11px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .hdr-icon {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #6c63ff, #4fa3e8);
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .hdr-title {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .hdr-sub {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 1px;
+        }
+
+        .hdr-dot {
+            margin-left: auto;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--faint);
+        }
+
+        .hdr-dot.on {
+            background: var(--green);
+            box-shadow: 0 0 6px var(--green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .4
+            }
+        }
+
+        /* ── SCREENS ──────────────────── */
+        .screen {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* ── SETUP SCREEN ─────────────── */
+        #sc-setup {
+            padding: 20px 18px;
+            gap: 14px;
+        }
+
+        .setup-h {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .setup-p {
+            font-size: 11.5px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .field label {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            margin-bottom: 5px;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 9px 12px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 12.5px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        .field input:focus {
+            border-color: var(--accent);
+        }
+
+        .field input::placeholder {
+            color: var(--faint);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 10px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity .15s, transform .15s;
+        }
+
+        .btn-primary:hover {
+            opacity: .9;
+            transform: translateY(-1px);
+        }
+
+        .setup-note {
+            font-size: 10px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        /* ── CHAT SCREEN ──────────────── */
+        #sc-chat {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Progress */
+        .progress-wrap {
+            padding: 9px 16px 0;
+            flex-shrink: 0;
+        }
+
+        .progress-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+
+        .progress-track {
+            height: 2px;
+            background: var(--border);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #4fa3e8);
+            border-radius: 99px;
+            transition: width .45s ease;
+            width: 0%;
+        }
+
+        /* Messages */
+        .chat-msgs {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-msgs::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .chat-msgs::-webkit-scrollbar-thumb {
+            background: var(--faint);
+            border-radius: 99px;
+        }
+
+        /* Bubbles */
+        .msg {
+            display: flex;
+            max-width: 100%;
+        }
+
+        .msg.ai {
+            align-self: flex-start;
+            gap: 7px;
+            align-items: flex-end;
+        }
+
+        .msg.usr {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .av {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #6c63ff, #4fa3e8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+        }
+
+        .bubble {
+            padding: 8px 12px;
+            border-radius: var(--radius);
+            max-width: 260px;
+            word-break: break-word;
+            line-height: 1.5;
+            font-size: 12.5px;
+        }
+
+        .msg.ai .bubble {
+            background: var(--ai-bubble);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 3px;
+        }
+
+        .msg.usr .bubble {
+            background: var(--user-bubble);
+            border-bottom-right-radius: 3px;
+            color: #fff;
+        }
+
+        /* Typing dots */
+        .typing {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 10px 12px;
+        }
+
+        .dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--muted);
+            animation: blink 1.2s infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: .2s
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: .4s
+        }
+
+        @keyframes blink {
+
+            0%,
+            60%,
+            100% {
+                opacity: .25;
+                transform: translateY(0)
+            }
+
+            30% {
+                opacity: 1;
+                transform: translateY(-3px)
+            }
+        }
+
+        /* Duration picker — shown after Q3 answer */
+        #duration-picker {
+            display: none;
+            margin: 4px 14px;
+            background: var(--card);
+            border: 1px solid var(--border-lit);
+            border-radius: var(--radius);
+            padding: 12px 14px;
+            gap: 10px;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        #duration-picker.show {
+            display: flex;
+        }
+
+        .dur-label {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .dur-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #dur-input {
+            width: 70px;
+            padding: 7px 10px;
+            background: var(--bg);
+            border: 1px solid var(--faint);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 700;
+            text-align: center;
+            font-family: inherit;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        #dur-input:focus {
+            border-color: var(--accent);
+        }
+
+        .dur-unit {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        #btn-confirm-dur {
+            margin-left: auto;
+            padding: 7px 14px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity .15s, transform .15s;
+            white-space: nowrap;
+        }
+
+        #btn-confirm-dur:hover {
+            opacity: .88;
+            transform: translateY(-1px);
+        }
+
+        /* Input area */
+        .input-area {
+            padding: 8px 12px 12px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 7px;
+            align-items: flex-end;
+            flex-shrink: 0;
+        }
+
+        #chat-input,
+        #debrief-input {
+            flex: 1;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px 11px;
+            color: var(--text);
+            font-size: 12.5px;
+            font-family: inherit;
+            resize: none;
+            outline: none;
+            min-height: 36px;
+            max-height: 80px;
+            line-height: 1.4;
+            transition: border-color .2s;
+        }
+
+        #chat-input:focus,
+        #debrief-input:focus {
+            border-color: var(--accent);
+        }
+
+        #chat-input::placeholder,
+        #debrief-input::placeholder {
+            color: var(--faint);
+        }
+
+        #btn-send,
+        #btn-send-debrief {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: var(--accent);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: transform .15s, opacity .15s;
+            color: #fff;
+        }
+
+        #btn-send:hover:not(:disabled),
+        #btn-send-debrief:hover:not(:disabled) {
+            transform: scale(1.06);
+        }
+
+        #btn-send:disabled,
+        #btn-send-debrief:disabled {
+            opacity: .35;
+            cursor: not-allowed;
+        }
+
+        #btn-send svg,
+        #btn-send-debrief svg {
+            width: 15px;
+            height: 15px;
+            fill: none;
+            stroke: #fff;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Start CTA */
+        #start-cta {
+            display: none;
+            margin: 0 14px 12px;
+            padding: 12px 14px;
+            background: var(--green-dim);
+            border: 1px solid #22c55e44;
+            border-radius: var(--radius);
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #start-cta.show {
+            display: flex;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .sg-item {
+            background: var(--card);
+            border-radius: 8px;
+            padding: 7px 9px;
+        }
+
+        .sg-item label {
+            display: block;
+            font-size: 9px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            margin-bottom: 2px;
+        }
+
+        .sg-item span {
+            font-size: 11.5px;
+            font-weight: 500;
+            color: var(--text);
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #btn-start {
+            width: 100%;
+            padding: 11px;
+            background: var(--green);
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            transition: transform .15s, box-shadow .2s;
+            letter-spacing: .02em;
+        }
+
+        #btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px #22c55e44;
+        }
+
+        #btn-start svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: #fff;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* ── ACTIVE SESSION SCREEN ────── */
+        #sc-active {
+            flex: 1;
+            padding: 18px;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 18px;
+            display: none;
+            flex-direction: column;
+        }
+
+        #sc-active.active {
+            display: flex;
+        }
+
+        .pulse-ring {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--green-dim);
+            border: 2px solid #22c55e44;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            animation: glow 3s infinite;
+        }
+
+        @keyframes glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 12px #22c55e22
+            }
+
+            50% {
+                box-shadow: 0 0 28px #22c55e55
+            }
+        }
+
+        .active-title {
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .active-sub {
+            font-size: 12px;
+            color: var(--muted);
+            max-width: 260px;
+            line-height: 1.5;
+        }
+
+        .stat-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 11px;
+            text-align: center;
+        }
+
+        .stat-card .val {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-card .lbl {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        #btn-end {
+            padding: 8px 18px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: border-color .2s, color .2s;
+        }
+
+        #btn-end:hover {
+            border-color: #e55;
+            color: #e55;
+        }
+
+        /* ── TOAST ──────────────────────── */
+        .toast {
+            position: fixed;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%) translateY(50px);
+            background: #c0392b;
+            color: #fff;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 500;
+            opacity: 0;
+            pointer-events: none;
+            transition: transform .3s, opacity .3s;
+            z-index: 9999;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* ── RANGE SLIDERS ──────────────── */
+        .slider-group {
+            width: 100%;
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .slider-group label {
+            display: block;
+            font-size: 11px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        .slider-val {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent);
+            width: 20px;
+        }
+
+        /* ── FINAL SUMMARY ──────────────── */
+        .final-card {
+            background: var(--card);
+            border: 1px solid var(--border-lit);
+            border-radius: var(--radius);
+            padding: 16px;
+            width: 100%;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .final-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--green);
+        }
+
+        .final-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            padding: 8px;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+
+        .stat-item .lbl {
+            font-size: 9px;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .stat-item .val {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .progress-box {
+            border-top: 1px solid var(--border);
+            padding-top: 12px;
+            font-size: 11.5px;
+            line-height: 1.5;
+            color: var(--muted);
+        }
+
+        .progress-box strong {
+            color: var(--text);
+        }
+
+        .ai-comparison {
+            font-style: italic;
+            margin-top: 10px;
+            color: var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+
+        <!-- HEADER -->
+        <header class="hdr">
+            <div class="hdr-icon">🧠</div>
+            <div>
+                <div class="hdr-title">ADHD Focus Monitor</div>
+                <div class="hdr-sub">AI Study Coach</div>
+            </div>
+            <div class="hdr-dot" id="hdr-dot"></div>
+        </header>
+
+        <!-- SETUP SCREEN -->
+        <div class="screen" id="sc-setup">
+            <p class="setup-h">👋 Welcome! Quick setup.</p>
+            <p class="setup-p">Enter your Cerebras API key and participant code to activate the AI study coach. Your data is stored securely.
+            </p>
+            <div class="field">
+                <label for="inp-key">Cerebras API Key</label>
+                <input type="password" id="inp-key" placeholder="csk-••••••••••••" autocomplete="off" />
+            </div>
+            <div class="field">
+                <label for="inp-code">Participant Code</label>
+                <input type="text" id="inp-code" placeholder="e.g., P001" autocomplete="off" />
+            </div>
+            <button class="btn-primary" id="btn-save">Save &amp; Continue →</button>
+            <p class="setup-note">🔒 Stored locally on your device. Get a key at <a href="https://cerebras.ai" target="_blank" style="color:var(--accent)">cerebras.ai</a>.</p>
+        </div>
+
+        <!-- CHAT SCREEN -->
+        <div class="screen" id="sc-chat">
+            <div class="progress-wrap">
+                <div class="progress-row">
+                    <span id="prog-label">Getting started…</span>
+                    <span id="prog-pct">0%</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="prog-fill"></div>
+                </div>
+            </div>
+
+            <div class="chat-msgs" id="chat-msgs"></div>
+
+            <!-- Duration picker (shown after Q3) -->
+            <div id="duration-picker">
+                <div class="dur-label">Suggested session length — adjust if you'd like:</div>
+                <div class="dur-row">
+                    <input type="number" id="dur-input" min="5" max="120" value="25" />
+                    <span class="dur-unit">minutes</span>
+                    <button id="btn-confirm-dur">Start with 25 min</button>
+                </div>
+            </div>
+
+            <!-- Start CTA (shown after all 4 collected) -->
+            <div id="start-cta">
+                <div class="summary-grid" id="summary-grid"></div>
+                <button id="btn-start">
+                    <svg viewBox="0 0 24 24">
+                        <polyline points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                    START SESSION
+                </button>
+            </div>
+
+            <div class="input-area" id="input-area">
+                <textarea id="chat-input" rows="1" placeholder="Type your reply…" maxlength="400"></textarea>
+                <button id="btn-send">
+                    <svg viewBox="0 0 24 24">
+                        <line x1="22" y1="2" x2="11" y2="13" />
+                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- ACTIVE SESSION SCREEN -->
+        <div class="screen" id="sc-active">
+            <div class="pulse-ring">🎯</div>
+            <div>
+                <div class="active-title">Session Active</div>
+                <div class="active-sub" id="active-sub">The AI coach is monitoring your focus.</div>
+            </div>
+            <div class="stat-row">
+                <div class="stat-card">
+                    <div class="val" id="live-timer">--:--</div>
+                    <div class="lbl">Remaining</div>
+                </div>
+                <div class="stat-card">
+                    <div class="val" id="live-score">100</div>
+                    <div class="lbl">Score</div>
+                </div>
+            </div>
+            <button id="btn-end">Pause / End Session</button>
+        </div>
+
+        <!-- DEBRIEF SCREEN -->
+        <div class="screen" id="sc-debrief">
+            <div class="progress-wrap">
+                <div class="progress-row">
+                    <span>Step 1/4: Session Debrief</span>
+                    <span id="debrief-step">1/6</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" style="width: 25%"></div>
+                </div>
+            </div>
+            <div class="chat-msgs" id="debrief-msgs"></div>
+            <div class="input-area">
+                <textarea id="debrief-input" rows="1" placeholder="Reply to coach..." maxlength="400"></textarea>
+                <button id="btn-send-debrief">
+                    <svg viewBox="0 0 24 24">
+                        <line x1="22" y1="2" x2="11" y2="13" />
+                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                    </svg>
+                </button>
+            </div>
+            <button id="btn-end-debrief" class="btn-secondary" style="margin-top: 10px; width: 100%; border: 1px solid var(--border); padding: 8px; border-radius: 8px; background: transparent; color: var(--muted); cursor: pointer; font-size: 13px;">End Debrief Early</button>
+        </div>
+
+
+
+        <!-- RATING SCREEN -->
+        <div class="screen" id="sc-rating" style="padding: 24px; align-items: center; justify-content: center;">
+            <div class="progress-wrap" style="padding: 0 0 30px 0; width: 100%;">
+                <div class="progress-row">
+                    <span>Step 3/4: Self Rating</span>
+                    <span>75%</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" style="width: 75%"></div>
+                </div>
+            </div>
+            <div class="slider-group">
+                <label>How much did you actually learn today?</label>
+                <div class="slider-row">
+                    <input type="range" id="rate-learn" min="1" max="10" value="5">
+                    <span class="slider-val" id="val-learn">5</span>
+                </div>
+            </div>
+            <div class="slider-group">
+                <label>How focused did you feel overall?</label>
+                <div class="slider-row">
+                    <input type="range" id="rate-focus" min="1" max="10" value="5">
+                    <span class="slider-val" id="val-focus">5</span>
+                </div>
+            </div>
+            <button class="btn-primary" id="btn-submit-rating" style="margin-top: 20px;">Save & Finish →</button>
+        </div>
+
+        <!-- FINAL SUMMARY SCREEN -->
+        <div class="screen" id="sc-final-summary" style="padding: 18px; overflow-y: auto;">
+            <div class="final-card">
+                <div class="final-title">Session Complete! 🚀</div>
+                <div class="final-stats">
+                    <div class="stat-item">
+                        <div class="lbl">Focus Score</div>
+                        <div class="val" id="res-score">--</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="lbl">Distractions</div>
+                        <div class="val" id="res-dist">--</div>
+                    </div>
+
+                    <div class="stat-item">
+                        <div class="lbl">Duration</div>
+                        <div class="val" id="res-dur">-- min</div>
+                    </div>
+                </div>
+                <div class="progress-box">
+                    <div id="res-vs-yesterday">Loading comparison...</div>
+                    <div class="ai-comparison" id="res-ai-msg"></div>
+                </div>
+            </div>
+            <button class="btn-primary" id="btn-restart" style="background: var(--green);">Start New Session</button>
+        </div>
+
+        <!-- STUDY COMPLETE SCREEN -->
+        <div class="screen" id="sc-complete" style="padding: 24px; text-align: center; flex-direction: column; justify-content: center; height: 100%;">
+            <div style="font-size: 48px; margin-bottom: 16px;">🎓</div>
+            <h2 style="color: var(--text); margin: 0 0 12px 0; font-size: 22px; font-weight: 600;">Trial Complete!</h2>
+            <p style="color: var(--text-dim); font-size: 14px; line-height: 1.6; margin-bottom: 30px;">
+                Congratulations and thank you for completing the entire 10-day trial. Your participation is incredibly valuable to our research!
+            </p>
+            
+            <a href="#" target="_blank" class="btn-primary" style="text-decoration: none; display: flex; align-items: center; justify-content: center; background: var(--accent); margin-bottom: 24px;">
+                Complete the Final Survey
+            </a>
+            
+            <p style="color: var(--text-dim); font-size: 12px; line-height: 1.5; background: var(--bg); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+                ✅ Your data has been successfully saved. You can now safely delete and uninstall this extension from your browser.
+            </p>
+        </div>
+
+    </div>
+    <div class="toast" id="toast"></div>
+    <script src="supabase.js"></script>
+        <script src="popup.js"></script>
+</body>
+
+</html>

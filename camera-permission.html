@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Camera Permission Required</title>
+    <style>
+        :root {
+            --bg: #0f1117;
+            --text: #f0f2ff;
+            --accent: #6c63ff;
+            --border: #2a2f47;
+            --muted: #8b93b8;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 450px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #fff, #8b93b8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            color: var(--muted);
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        #btn-allow {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        #btn-allow:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
+        }
+
+        #btn-allow:active {
+            transform: translateY(0);
+        }
+
+        #error-msg {
+            color: #ff4d4d;
+            margin-top: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="icon">👁️</div>
+        <h1>Camera Access Required</h1>
+        <p>
+            The ADHD Focus Monitor needs your camera to track your gaze and help you focus.
+            <strong>No video is ever recorded or stored</strong>; all processing happens in your browser.
+        </p>
+        <button id="btn-allow">Allow Camera Access</button>
+        <div id="error-msg"></div>
+    </div>
+
+    <script src="camera-permission.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,58 @@
+{
+    "manifest_version": 3,
+    "name": "ADHD Focus Monitor",
+    "version": "0.1",
+    "description": "AI-powered focus monitor for ADHD users — pre-session chatbot, eye tracking, escalating interventions, and session analytics.",
+    "permissions": [
+        "activeTab",
+        "storage",
+        "scripting",
+        "alarms",
+        "notifications",
+        "offscreen"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "ADHD Focus Monitor"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "css": [
+                "styles/intervention.css",
+                "styles/chatbot.css",
+                "styles/calibration.css",
+                "styles/overlay.css"
+            ],
+            "run_at": "document_idle"
+        }
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "mediapipe/*",
+                "camera-permission.html",
+                "camera-permission.js",
+                "offscreen.html",
+                "offscreen.js"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ],
+    "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+    }
+}
